@@ -19,7 +19,7 @@ resource "cloudflare_record" "{{.Record.Type}}_{{replace .Record.Name "." "_"}}_
 {{ if .Zone.Paused}}
     paused = "true"
 {{end}}
-    name = "{{.Record.Name}}"
+    name = "{{.Name}}"
     type = "{{.Record.Type}}"
     ttl = "{{.Record.TTL}}"
     proxied = "{{.Record.Proxied}}"
@@ -156,15 +156,22 @@ var recordCmd = &cobra.Command{
 
 func recordParse(zone cloudflare.Zone, record cloudflare.DNSRecord) {
 	tmpl := template.Must(template.New("record").Funcs(templateFuncMap).Parse(recordTemplate))
+	name := record.Name
+	if name != zone.Name {
+		name = name[:len(name)-len(zone.Name)-1]
+	}
+
 	tmpl.Execute(os.Stdout,
 		struct {
 			Zone             cloudflare.Zone
 			Record           cloudflare.DNSRecord
+			Name             string
 			IsValueTypeField bool
 			IsDataTypeField  bool
 		}{
 			Zone:             zone,
 			Record:           record,
+			Name:             name,
 			IsValueTypeField: contains(dnsTypeValueFields, record.Type),
 			IsDataTypeField:  contains(dnsTypeDataFields, record.Type),
 		})
