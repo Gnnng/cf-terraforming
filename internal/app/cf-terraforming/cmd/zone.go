@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -79,7 +80,9 @@ var zoneCmd = &cobra.Command{
 
 			if tfstate {
 				r := zoneResourceStateBuild(zone)
-				resourcesMap["cloudflare_zone."+strings.ReplaceAll(zoneDetails.Name, ".", "_")] = r
+				name := "cloudflare_zone." + strings.ReplaceAll(zoneDetails.Name, ".", "_")
+				resourcesMap[name] = r
+				fmt.Fprintf(os.Stderr, "terraform import %s %s\n", name, zone.ID)
 			} else {
 				zoneParse(zone)
 			}

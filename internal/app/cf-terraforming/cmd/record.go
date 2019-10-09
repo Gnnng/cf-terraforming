@@ -145,6 +145,7 @@ var recordCmd = &cobra.Command{
 					state := recordResourceStateBuild(zone, r)
 					name := r.Type + "_" + strings.ReplaceAll(r.Name, ".", "_") + "_" + r.ID
 					resourcesMap["cloudflare_record."+name] = state
+					fmt.Fprintf(os.Stderr, "terraform import cloudflare_record.%s %s/%s\n", name, zone.ID, r.ID)
 				} else {
 					recordParse(zone, r)
 				}
@@ -179,8 +180,6 @@ func recordResourceStateBuild(zone cloudflare.Zone, record cloudflare.DNSRecord)
 	if record.Data != nil {
 		data = record.Data.(map[string]interface{})
 	}
-
-	log.Printf("%#v", data)
 
 	r := Resource{
 		Primary: Primary{
